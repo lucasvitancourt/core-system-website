@@ -3,6 +3,16 @@ import axios from "axios";
 
 const API_BASE = "https://core-system.site/api";
 
+function getArrayFromResponse(res) {
+  if (Array.isArray(res)) return res;
+  if (res && typeof res === "object") {
+    if (Array.isArray(res.data)) return res.data;
+    if (Array.isArray(res.results)) return res.results;
+    return Object.values(res);
+  }
+  return [];
+}
+
 export default function MetricsCards() {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -10,41 +20,46 @@ export default function MetricsCards() {
   useEffect(() => {
     async function fetchMetrics() {
       try {
-        // 1. Buscar todas as empresas
+        // Buscar todas as empresas
         const empresasRes = await axios.get(`${API_BASE}/empresas`);
-        let empresas = empresasRes.data;
-        if (!Array.isArray(empresas)) {
-          // Se vier objeto, transforma em array
-          empresas = Object.values(empresas);
-        }
-        const empresaId = empresas[0]?.id || empresas[0]?.id_empresa || empresas[0]?.ID || empresas[0]?.Id;
-        console.log('Empresas:', empresas);
-        console.log('EmpresaId:', empresaId);
+        let empresas = getArrayFromResponse(empresasRes.data);
+        const empresaIds = empresas.map(e => e.id || e.id_empresa || e.ID || e.Id).filter(Boolean);
 
-        let clientes = [];
-        let servicos = [];
-        let funcionarios = [];
+        let totalClientes = 0;
+        let totalServicos = 0;
+        let totalFuncionarios = 0;
 
-        if (empresaId) {
-          // 2. Buscar clientes, serviços, funcionários da primeira empresa
-          const [clientesRes, servicosRes, funcionariosRes] = await Promise.all([
-            axios.get(`${API_BASE}/clientes?empresa=${empresaId}`),
-            axios.get(`${API_BASE}/servicos?empresa=${empresaId}`),
-            axios.get(`${API_BASE}/funcionarios?empresa=${empresaId}`),
-          ]);
-          clientes = Array.isArray(clientesRes.data) ? clientesRes.data : Object.values(clientesRes.data || {});
-          servicos = Array.isArray(servicosRes.data) ? servicosRes.data : Object.values(servicosRes.data || {});
-          funcionarios = Array.isArray(funcionariosRes.data) ? funcionariosRes.data : Object.values(funcionariosRes.data || {});
-          console.log('Clientes:', clientes);
-          console.log('Serviços:', servicos);
-          console.log('Funcionários:', funcionarios);
-        }
+        // Buscar clientes, serviços, funcionários de todas as empresas
+        await Promise.all(empresaIds.map(async (empresaId) => {
+          try {
+            const [clientesRes, servicosRes, funcionariosRes] = await Promise.all([
+              axios.get(`${API_BASE}/clientes?empresa=${empresaId}`),
+              axios.get(`${API_BASE}/servicos?empresa=${empresaId}`),
+              axios.get(`${API_BASE}/funcionarios?empresa=${empresaId}`),
+            ]);
+            const clientes = getArrayFromResponse(clientesRes.data);
+            const servicos = getArrayFromResponse(servicosRes.data);
+            const funcionarios = getArrayFromResponse(funcionariosRes.data);
+
+            // LOG para debug
+            console.log(`Empresa ${empresaId}:`, {
+              clientes, servicos, funcionarios
+            });
+
+            totalClientes += clientes.length;
+            totalServicos += servicos.length;
+            totalFuncionarios += funcionarios.length;
+          } catch (err) {
+            // Se der erro em uma empresa, ignora e segue
+            console.error("Erro em empresa", empresaId, err);
+          }
+        }));
 
         setMetrics({
           empresas: empresas.length,
-          clientes: clientes.length,
-          servicos: servicos.length,
-          funcionarios: funcionarios.length,
+          clientes: totalClientes,
+          servicos: totalServicos,
+          funcionarios: totalFuncionarios,
         });
       } catch (e) {
         setMetrics({ status: "error" });
