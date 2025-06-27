@@ -1,12 +1,125 @@
-# React + Vite
+# Core System - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend do sistema de agendamentos Core System, desenvolvido em React com Vite.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologias
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** - Biblioteca JavaScript para interfaces
+- **Vite** - Build tool e dev server
+- **Axios** - Cliente HTTP
+- **Tailwind CSS** - Framework CSS
+- **Material Symbols** - Ícones
 
-## Expanding the ESLint configuration
+## 📦 Instalação
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **Instale as dependências:**
+```bash
+npm install
+```
+
+2. **Configure a API:**
+   - Certifique-se de que a API PHP está rodando em `http://localhost/New/api/`
+   - Ou altere a URL base no arquivo `src/components/MetricsCards.jsx`
+
+3. **Execute o projeto:**
+```bash
+npm run dev
+```
+
+O projeto estará disponível em `http://localhost:3000`
+
+## 🛠️ Scripts Disponíveis
+
+- `npm run dev` - Inicia o servidor de desenvolvimento
+- `npm run build` - Gera build de produção
+- `npm run preview` - Visualiza o build de produção
+- `npm run lint` - Executa o linter
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── components/          # Componentes React
+│   ├── Header.jsx      # Cabeçalho da aplicação
+│   ├── Hero.jsx        # Seção principal
+│   ├── About.jsx       # Seção sobre
+│   ├── Modules.jsx     # Módulos do sistema
+│   ├── Screenshots.jsx # Screenshots
+│   ├── MetricsCards.jsx # Métricas da API
+│   └── Footer.jsx      # Rodapé
+├── App.jsx             # Componente principal
+├── main.jsx           # Ponto de entrada
+└── index.css          # Estilos globais
+```
+
+## 🔧 Configuração da API
+
+O frontend se conecta com a API PHP através do componente `MetricsCards.jsx`. 
+
+**URL da API:** `http://localhost/New/api/metrics.php`
+
+**Parâmetros disponíveis:**
+- `tipo`: `resumido`, `detalhado`, `completo`
+- `periodo`: `dia`, `semana`, `mes`, `ano`
+- `id_empresa`: ID específico da empresa (opcional)
+
+## 🎨 Personalização
+
+### Cores
+As cores podem ser alteradas no arquivo `src/index.css` através das variáveis CSS:
+
+```css
+:root {
+  --cor-primaria: #6366f1;
+  --cor-secundaria: #161a2d;
+  --cor-clara: #fff;
+  --cor-cinza: #f0f4ff;
+  /* ... */
+}
+```
+
+### Componentes
+Cada componente pode ser personalizado editando os arquivos `.jsx` correspondentes.
+
+## 📱 Responsividade
+
+O projeto é totalmente responsivo e funciona em:
+- Desktop (1200px+)
+- Tablet (768px - 1199px)
+- Mobile (até 767px)
+
+## 🚀 Deploy
+
+Para fazer deploy em produção:
+
+1. **Gere o build:**
+```bash
+npm run build
+```
+
+2. **Os arquivos estarão em `dist/`**
+
+3. **Faça upload para seu servidor web**
+
+## 🔍 Troubleshooting
+
+### Erro de CORS
+Se houver erro de CORS, verifique se a API PHP tem os headers corretos:
+```php
+header('Access-Control-Allow-Origin: *');
+```
+
+### API não responde
+- Verifique se o servidor Apache/PHP está rodando
+- Confirme se a URL da API está correta
+- Teste a API diretamente no navegador
+
+### Dependências não instalam
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## 📄 Licença
+
+Este projeto faz parte do Core System.
