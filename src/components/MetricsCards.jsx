@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://api-metrics-lxr9.onrender.com/api";
 
 async function fetchMetricsFromApi() {
   // Tenta ambos os endpoints para máxima compatibilidade
