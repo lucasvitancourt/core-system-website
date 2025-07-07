@@ -1,7 +1,26 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_BASE = "http://localhost/New/api";
+const API_BASE = "http://localhost:5000/api";
+
+async function fetchMetricsFromApi() {
+  // Tenta ambos os endpoints para máxima compatibilidade
+  const urls = [
+    `${API_BASE}/metrics.php?tipo=resumido`,
+    `${API_BASE}/metrics?tipo=resumido`,
+  ];
+  for (let url of urls) {
+    try {
+      const response = await axios.get(url);
+      if (response.data && response.data.status === 'success') {
+        return response.data.metricas_gerais;
+      }
+    } catch (err) {
+      // tenta o próximo endpoint
+    }
+  }
+  throw new Error('Nenhum endpoint de métricas disponível');
+}
 
 export default function MetricsCards() {
   const [metrics, setMetrics] = useState(null);
@@ -13,28 +32,17 @@ export default function MetricsCards() {
       try {
         setLoading(true);
         setError(null);
-        
-        // Buscar métricas usando o novo endpoint
-        const response = await axios.get(`${API_BASE}/metrics.php?tipo=resumido`);
-        
-        if (response.data.status === 'success') {
-          const data = response.data.metricas_gerais;
-          setMetrics({
-            empresas: data.empresas || 0,
-            clientes: data.clientes || 0,
-            servicos: data.servicos || 0,
-            funcionarios: data.usuarios || 0,
-            agendamentos: data.agendamentos || 0,
-            comandas: data.comandas || 0
-          });
-        } else {
-          throw new Error('Erro na resposta da API');
-        }
+        const data = await fetchMetricsFromApi();
+        setMetrics({
+          empresas: data.empresas || 0,
+          clientes: data.clientes || 0,
+          servicos: data.servicos || 0,
+          funcionarios: data.usuarios || 0,
+          agendamentos: data.agendamentos || 0,
+          comandas: data.comandas || 0
+        });
       } catch (err) {
-        console.error('Erro ao buscar métricas:', err);
         setError('Erro ao carregar métricas. Verifique se a API está rodando.');
-        
-        // Fallback com dados de exemplo
         setMetrics({
           empresas: 0,
           clientes: 0,
@@ -47,7 +55,6 @@ export default function MetricsCards() {
         setLoading(false);
       }
     }
-    
     fetchMetrics();
   }, []);
 
@@ -77,42 +84,12 @@ export default function MetricsCards() {
   }
 
   const cards = [
-    { 
-      title: "Empresas", 
-      value: metrics.empresas, 
-      icon: "business",
-      color: "#4CAF50"
-    },
-    { 
-      title: "Clientes", 
-      value: metrics.clientes, 
-      icon: "person",
-      color: "#2196F3"
-    },
-    { 
-      title: "Serviços", 
-      value: metrics.servicos, 
-      icon: "build_circle",
-      color: "#FF9800"
-    },
-    { 
-      title: "Funcionários", 
-      value: metrics.funcionarios, 
-      icon: "group",
-      color: "#9C27B0"
-    },
-    { 
-      title: "Agendamentos", 
-      value: metrics.agendamentos, 
-      icon: "schedule",
-      color: "#607D8B"
-    },
-    { 
-      title: "Comandas", 
-      value: metrics.comandas, 
-      icon: "receipt",
-      color: "#795548"
-    }
+    { title: "Empresas", value: metrics.empresas, icon: "business", color: "#4CAF50" },
+    { title: "Clientes", value: metrics.clientes, icon: "person", color: "#2196F3" },
+    { title: "Serviços", value: metrics.servicos, icon: "build_circle", color: "#FF9800" },
+    { title: "Funcionários", value: metrics.funcionarios, icon: "group", color: "#9C27B0" },
+    { title: "Agendamentos", value: metrics.agendamentos, icon: "schedule", color: "#607D8B" },
+    { title: "Comandas", value: metrics.comandas, icon: "receipt", color: "#795548" }
   ];
 
   return (
